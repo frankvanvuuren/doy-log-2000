@@ -1,0 +1,22 @@
+{
+  "name": "doy-log2000",
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "devDependencies": {
+    "@carbon/charts-svelte": "^0.45.1",
+    "@sveltejs/vite-plugin-svelte": "^1.0.0-next.11",
+    "arcsecond": "^4.0.0",
+    "bulma": "^0.9.3",
+    "d3": "^7.0.1",
+    "html2canvas": "^1.3.2",
+    "sass": "^1.38.1",
+    "svelte": "^3.37.0",
+    "svelte-codejar": "github:novacbn/svelte-codejar#0.0.4",
+    "vite": "^2.4.4"
+  }
+}
