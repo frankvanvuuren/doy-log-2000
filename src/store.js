@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store';
 
-let activeTab = writable('eu-kick-log')
+let activeTab = writable('eu-kick')
 
 
 
@@ -9,8 +9,9 @@ let editor = writable('')
 let logs = writable({
   'eu-kick': '',
   'eu-ban': '',
-  'eu-kick': '',
+  'us-kick': '',
   'us-ban': ''
 })
+
 
 export {activeTab, logs, editor}

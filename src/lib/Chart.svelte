@@ -1,148 +1,71 @@
 <script>
- import { BarChartStacked } from '@carbon/charts-svelte'
- import {banParser} from './log-parser.js'
- import "@carbon/charts/styles-g100.css"
+    import { BarChartStacked } from '@carbon/charts-svelte'
+    import {kickParser, banParser} from './log-parser.js'
+    import "@carbon/charts/styles-g100.css"
 
- import {logs} from '../store'
- console.log(banParser)
- logs.subscribe((logs) => {
-     let euKick = logs['eu-kick-log']
-     banParser.fork(
-         euKick,
-         (error, state) => console.log(error, state),
-         (result, state) => console.log(result, state)
-     )
- })
+    import {logs} from '../store'
+    import euKickLog from '../logs/kick_logs_June_2021.txt?raw'
+    import usKickLog from '../logs/US_June_Kick_03-18.txt?raw'
+    import euBanLog from '../logs/ban_logs_June_2021.txt?raw'
+    import usBanLog from '../logs/US_June_Ban_04-18.txt?raw'
+
+    const toData = (group) => (result, _) => {
+        const a  = result.filter(x => x !== undefined).reduce((acc, val) => {
+            if(acc[val.adminname] === undefined) {
+                acc[val.adminname] = 0
+            }
+            acc[val.adminname] = acc[val.adminname] + 1
+            return acc
+        }, {})
+        return Object.keys(a).map((key, index) => {
+            return {
+                "group": group,
+                "key": key,
+                "value": a[key]
+            }
+        })
+    }
+    let data = []
+    logs.subscribe(logs => {
+        let euKick = kickParser.fork(logs['eu-kick'], (error, parserState) => [], toData("EU KICK"))
+        let euBan = banParser.fork(logs['eu-ban'], (error, parserState) => [], toData("EU BAN"))
+
+        let usKick = kickParser.fork(logs['us-kick'], (error, parserState) => [], toData("US KICK"))
+        let usBan = banParser.fork(logs['us-ban'], (error, parserState) => [], toData("US BAN"))
+
+        data = [...euKick, ...euBan, ...usKick, ...usBan]
+        console.log(data)
+    })
+    console.log($logs)
 </script>
 
 <div id="graph" style="padding: 10px 10px">
     <BarChartStacked
-        data={[
-             {
-                 "group": "EU KICK",
-                 "key": "Joshua Bond",
-                 "value": 65000
-             },
-             {
-                 "group": "EU KICK",
-                 "key": "Ying-Min Yang",
-                 "value": 29123
-             },
-             {
-                 "group": "EU KICK",
-                 "key": "BG",
-                 "value": 35213
-             },
-             {
-                 "group": "EU KICK",
-                 "key": "Old One Eye",
-                 "value": 51213
-             },
-             {
-                 "group": "EU KICK",
-                 "key": "Wulfward",
-                 "value": 16932
-             },
-             {
-                 "group": "EU BAN",
-                 "key": "Joshua Bond",
-                 "value": 32432
-             },
-             {
-                 "group": "EU BAN",
-                 "key": "Ying-Min Yang",
-                 "value": 21312
-             },
-             {
-                 "group": "EU BAN",
-                 "key": "BG",
-                 "value": 56456
-             },
-             {
-                 "group": "EU BAN",
-                 "key": "Old One Eye",
-                 "value": 21312
-             },
-             {
-                 "group": "EU BAN",
-                 "key": "Wulfward",
-                 "value": 34234
-             },
-             {
-                 "group": "US KICK",
-                 "key": "Joshua Bond",
-                 "value": 12312
-             },
-             {
-                 "group": "US KICK",
-                 "key": "Ying-Min Yang",
-                 "value": 23232
-             },
-             {
-                 "group": "US KICK",
-                 "key": "BG",
-                 "value": 34232
-             },
-             {
-                 "group": "US KICK",
-                 "key": "Old One Eye",
-                 "value": 12312
-             },
-             {
-                 "group": "US KICK",
-                 "key": "Wulfward",
-                 "value": 34234
-             },
-             {
-                 "group": "US BAN",
-                 "key": "Joshua Bond",
-                 "value": 32423
-             },
-             {
-                 "group": "US BAN",
-                 "key": "Ying-Min Yang",
-                 "value": 21313
-             },
-             {
-                 "group": "US BAN",
-                 "key": "BG",
-                 "value": 64353
-             },
-             {
-                 "group": "US BAN",
-                 "key": "Old One Eye",
-                 "value": 24134
-             },
-             {
-                 "group": "US BAN",
-                 "key": "Wulfward",
-                 "value": 32423
-             }
-             ]}
-             options={{
-                     "title": "kicks and bans",
-                     "toolbar": {
-                         enabled: true,
-                     },
-                     "axes": {
-                         "left": {
-                             "mapsTo": "value",
-                             "stacked": true
-                         },
-                         "bottom": {
-                             "mapsTo": "key",
-                             "scaleType": "labels"
-                         }
-                     },
-                     "color": {
-                         "scale": {
-                             "EU KICK": "#FF3030",
-                             "EU BAN": "#800505",
-                             "US KICK": "#1CB9FC",
-                             "US BAN": "#0372A1"
-                         }
-                     },
-                     "height": "600px"
-                     }}
-    />
+        bind:data
+        options={{
+        "title": "kicks and bans",
+        "toolbar": {
+        enabled: true,
+        },
+        "axes": {
+        "left": {
+        "mapsTo": "value",
+        "stacked": true
+        },
+        "bottom": {
+        "mapsTo": "key",
+        "scaleType": "labels"
+        }
+        },
+        "color": {
+        "scale": {
+        "EU KICK": "#FF3030",
+        "EU BAN": "#800505",
+        "US KICK": "#1CB9FC",
+        "US BAN": "#0372A1"
+        }
+        },
+        "height": "600px"
+        }}
+        />
 </div>
