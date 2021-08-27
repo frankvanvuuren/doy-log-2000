@@ -5,13 +5,10 @@
   import mhp from './assets/mhp.gif'
   import rake from './assets/rake.gif'
   import Editor from './lib/Editor.svelte'
-  import  Navbar from './lib/Navbar.svelte'
   import  Tabs from './lib/Tabs.svelte'
   import  Chart from './lib/Chart.svelte'
-  import Save from './lib/Save.svelte'
   import {version} from '../package.json'
   import 'bulma'
-  import {activeTab, logs, editor} from './store'
 </script>
 
 <main class="container">
@@ -32,12 +29,11 @@
       <img class="image" src={lls} alt="Long live Stalweidism" />
     </div>
   </div>
-  <br />
+  <hr />
   <Chart />
   <hr />
   <div class="columns">
     <div class="column">
-      <Save />
     </div>
     <div class="column">
       <img src={mhp} alt="Made By Frank\nHosted on Sacrilege\nProperty of Duke of York"/>
