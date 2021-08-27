@@ -11,7 +11,4 @@
 ## Build instuctions
 1. run `npm run build`
 
-## Authors
-- Frank
-
-This project is property of Duke of York
+![image](src/assets/mhp.gif)
