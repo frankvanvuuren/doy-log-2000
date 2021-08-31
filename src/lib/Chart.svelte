@@ -1,6 +1,6 @@
 <script>
     import { BarChartStacked } from '@carbon/charts-svelte'
-    import {kickParser, banParser} from './log-parser.js'
+    import {kickParser, banParser} from './easy-parser.js'
     import "@carbon/charts/styles-g100.css"
 
     import {logs} from '../store'
@@ -40,39 +40,105 @@
 
     let options = gen_options(true)
 
-    const toData = (group) => (result, _) => {
-        const a  = result.filter(x => x !== undefined).reduce((acc, val) => {
-            if(acc[val.adminname] === undefined) {
-                acc[val.adminname] = 0
-            }
-            acc[val.adminname] = acc[val.adminname] + 1
-            return acc
-        }, {})
-        return Object.keys(a).map((key, index) => {
+    const toData = (group) => (result) => {
+        return Object.keys(result).map((key, index) => {
             return {
                 "group": group,
                 "key": key,
-                "value": a[key]
+                "value": result[key]
             }
         })
     }
     let data = []
-    logs.subscribe(logs => {
-        let euKick = kickParser.fork(logs['eu-kick'], (error, parserState) => [], toData("EU KICK"))
-        let euBan = banParser.fork(logs['eu-ban'], (error, parserState) => [], toData("EU BAN"))
+    function generate() {
+        let euKick = kickParser($logs['eu-kick'], toData("EU KICK"))
+        let euBan = banParser($logs['eu-ban'], toData("EU BAN"))
 
-        let usKick = kickParser.fork(logs['us-kick'], (error, parserState) => [], toData("US KICK"))
-        let usBan = banParser.fork(logs['us-ban'], (error, parserState) => [], toData("US BAN"))
+        let usKick = kickParser($logs['us-kick'], toData("US KICK"))
+        let usBan = banParser($logs['us-ban'], toData("US BAN"))
 
         data = [...euKick, ...euBan, ...usKick, ...usBan]
 
         if(euKick.length > 0 && euBan.length > 0, usKick.length > 0, usBan.length > 0) {
             options = gen_options(false)
         }
+    }
 
-    })
+    let new_record = {
+        group: "EU KICK",
+        key: "",
+        value: 0,
+    }
+
+    function removeRecord(s) {
+        return function() {
+            data = data.filter(x => {
+                if(x["group"] == s["group"] && x["key"] == s["key"]) {
+                    return false
+                } else {
+                    return true
+                }
+            })
+        }
+    }
+
+    function addRecord() {
+        data = [...data, new_record]
+        console.log(new_record)
+        new_record = {group: "EU KICK", key: "", value: 0}
+
+    }
 </script>
 
-<div id="graph" style="padding: 10px 10px">
-    <BarChartStacked bind:data options={options} />
+<div>
+    <button class="button is-danger" on:click={generate}>Generate</button>
+    <div id="graph" style="padding: 10px 10px">
+        <BarChartStacked bind:data options={options} />
+    </div>
+    {#if data.length > 1 } 
+        <hr>
+        <div class="columns">
+            <div class="column">
+                <div class="table-container">
+                    <table class="table is-dark is-fullwidth is-bordered is-narrow is-hoverable">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Admin</th>
+                                <th>Value</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {#each data as record }
+                                <tr>
+                                    <td>{record.group}</td>
+                                    <td><input class="input" type="text" bind:value={record.key} /></td>
+                                    <td><input class="input" type="number" bind:value={record.value} /></td>
+                                    <td><button on:click={removeRecord(record)} class="button is-danger">DELETE</button></td>
+                                </tr>
+                            {/each}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td>
+                                    <select class="select" bind:value={new_record.group}>
+                                        <option>EU KICK</option>
+                                        <option>EU BAN</option>
+                                        <option>US KICK</option>
+                                        <option>US BAN</option>
+                                    </select>
+                                </td>
+                                <td><input class="input" type="text" bind:value={new_record.key}/></td>
+                                <td><input class="input" type="number" bind:value={new_record.value}/></td>
+                                <td><button on:click={addRecord} class="button is-primary">ADD</button></td>
+                            </tr>
+                        </tfoot>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+    {/if}
+    
 </div>
