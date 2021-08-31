@@ -40,11 +40,15 @@
 
     let options = gen_options(true)
 
+    function capitalizeFirstLetter(string) {
+          return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
     const toData = (group) => (result) => {
         return Object.keys(result).map((key, index) => {
             return {
                 "group": group,
-                "key": key,
+                "key": capitalizeFirstLetter(key),
                 "value": result[key]
             }
         })
@@ -57,7 +61,11 @@
         let usKick = kickParser($logs['us-kick'], toData("US KICK"))
         let usBan = banParser($logs['us-ban'], toData("US BAN"))
 
-        data = [...euKick, ...euBan, ...usKick, ...usBan]
+        data = [...euKick, ...euBan, ...usKick, ...usBan].sort((a, b) => {
+            if(a.key === b.key) return 0
+            if(a.key > b.key) return 1
+            return -1
+        })
 
         if(euKick.length > 0 && euBan.length > 0, usKick.length > 0, usBan.length > 0) {
             options = gen_options(false)
