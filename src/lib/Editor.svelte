@@ -1,19 +1,18 @@
 <script>
-  import {CodeJar} from 'svelte-codejar'
-  import {activeTab, logs, editor} from '../store'
+  import {CodeJar} from "@novacbn/svelte-codejar";
+  import {activeTab, logs} from '../store';
+  import easyHighlighter from './easy-highlighter.js';
 
-  editor.subscribe(editor => {
-    $logs[$activeTab] = editor
-  })
-
-  activeTab.subscribe(tab => {
-    $editor = $logs[tab]
-  })
+  export let highlight;
+  export let show;
+  export let tab;
 </script>
 
 <CodeJar
-  style="border: 1px dashed white; background-color: black; color: white; height: 600px;"
+  style="display: {show ? "block" : "none" }; border: 1px dashed white; background-color: black; color: white; height: 600px;"
   spellcheck={false}
+  syntax="ban-log"
   tab={"\t"}
-  bind:value={$editor}
+  {highlight}
+  on:change={(v) => $logs[tab] = v.detail.value}
 />

@@ -3,11 +3,9 @@
     import {kickParser, banParser} from './easy-parser.js'
     import "@carbon/charts/styles-g100.css"
 
+    import chartSort from './chart-sort.js'
+
     import {logs} from '../store'
-    import euKickLog from '../logs/kick_logs_June_2021.txt?raw'
-    import usKickLog from '../logs/US_June_Kick_03-18.txt?raw'
-    import euBanLog from '../logs/ban_logs_June_2021.txt?raw'
-    import usBanLog from '../logs/US_June_Ban_04-18.txt?raw'
 
     const gen_options = (loading) => ({
         "data": {
@@ -27,12 +25,15 @@
                 "scaleType": "labels"
             }
         },
+        "legend": {
+            "order": ["EU KICK", "EU BAN", "US KICK", "US BAN"]
+        },
         "color": {
             "scale": {
-                "EU KICK": "#FF3030",
-                "EU BAN": "#800505",
-                "US KICK": "#1CB9FC",
-                "US BAN": "#0372A1"
+                "EU KICK": "#1CB9FC",
+                "EU BAN": "#0372A1",
+                "US KICK": "#FF3030",
+                "US BAN": "#800505"
             }
         },
         "height": "600px"
@@ -53,6 +54,7 @@
             }
         })
     }
+
     let data = []
     function generate() {
         let euKick = kickParser($logs['eu-kick'], toData("EU KICK"))
@@ -61,22 +63,22 @@
         let usKick = kickParser($logs['us-kick'], toData("US KICK"))
         let usBan = banParser($logs['us-ban'], toData("US BAN"))
 
-        data = [...euKick, ...euBan, ...usKick, ...usBan].sort((a, b) => {
-            if(a.key === b.key) return 0
-            if(a.key > b.key) return 1
-            return -1
-        })
+        const dummy = [
+            {group: "EU KICK", key: "", value: 0},
+            {group: "EU BAN", key: "", value: 0},
+            {group: "US KICK", key: "", value: 0},
+            {group: "US BAN", key: "", value: 0}
+        ]
+
+        data = [...chartSort([...euKick, ...euBan, ...usKick, ...usBan])]
+
 
         if(euKick.length > 0 && euBan.length > 0, usKick.length > 0, usBan.length > 0) {
             options = gen_options(false)
         }
     }
 
-    let new_record = {
-        group: "EU KICK",
-        key: "",
-        value: 0,
-    }
+    let new_record = {group: "EU KICK", key: "", value: 0}
 
     function removeRecord(s) {
         return function() {
@@ -92,7 +94,6 @@
 
     function addRecord() {
         data = [...data, new_record]
-        console.log(new_record)
         new_record = {group: "EU KICK", key: "", value: 0}
 
     }
